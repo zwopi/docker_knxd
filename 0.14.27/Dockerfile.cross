@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends\
 
 # Build knxd
 RUN git clone https://github.com/knxd/knxd.git
-RUN cd knxd && git checkout tags/v__VERSION__ && dpkg-buildpackage -b -uc
+RUN cd knxd && git checkout tags/DEBIAN-0.14.27-2 && dpkg-buildpackage -b -uc
 
 FROM resin/__BASEIMAGE_ARCH__-debian:stretch
 

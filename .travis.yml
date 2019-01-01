@@ -5,6 +5,17 @@ language: bash
 service:
   - docker
 
+stages:
+  - build
+  - name: tag version
+    if: branch = master
+  - name: tag latest
+    if: branch = master
+
+env:
+  - VERSION=0.14.25
+  - VERSION=0.14.27
+
 before_install:
   - wget https://github.com/clnperez/cli/releases/download/1.0/docker-linux-amd64
   - chmod 755 docker-linux-amd64
@@ -12,21 +23,22 @@ before_install:
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
+script:
+  - make amd64
+  - make arm32v7
+
+deploy:
+  provider: script
+  script:
+    - docker push $(REPO)/$(IMAGE_NAME):$(VERSION)-amd64
+    - docker push $(REPO)/$(IMAGE_NAME):$(VERSION)-arm32v7
+  on:
+    branch: master
+
 jobs:
   include:
-    - stage: build
-      script:
-        - make amd64
-        - make arm32v7
-        - make tag
-    - stage: latest
-      script: make latest
-
-stages:
-  - build
-  - name: latest
-    if: branch = master
-
-env:
-  global: LATEST=0.14.25
-          VERSION=0.14.25
+    - stage: tag version
+      script: make tag
+    - stage: tag latest
+      script: make tag-latest
+      env: LATEST=0.14.27
